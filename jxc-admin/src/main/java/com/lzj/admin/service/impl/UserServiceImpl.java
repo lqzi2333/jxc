@@ -37,12 +37,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public User findUserByUserName(String userName) {
-        return this.baseMapper.selectOne(new QueryWrapper<User>().eq("is_del",0).eq("user_name",userName));
+//        return this.baseMapper.selectOne(new QueryWrapper<User>().eq("is_del",0).eq("user_name",userName));
+        return  this.baseMapper.selectOne(new QueryWrapper<User>().eq("is_del",0).eq("user_name",userName));
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
-    public void updateUserInfo(User user) {
+    public void  updateUserInfo(User user) {
         /**
          * 用户名
          *    非空
@@ -74,8 +75,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         AssertUtil.isTrue(newPassword.equals(oldPassword),"新密码与原始密码不能一致!");
         user.setPassword(newPassword);
         AssertUtil.isTrue(!(this.updateById(user)),"用户密码更新失败!");
-
     }
-
-
 }

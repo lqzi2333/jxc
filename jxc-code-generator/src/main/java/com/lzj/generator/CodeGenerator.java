@@ -49,7 +49,7 @@ public class CodeGenerator {
         String projectPath = System.getProperty("user.dir");
         gc.setOutputDir(projectPath + "/jxc-admin/src/main/java");
         //作者
-        gc.setAuthor("老李");
+        gc.setAuthor("lqc");
         //打开输出目录
         gc.setOpen(false);
         //xml开启 BaseResultMap
@@ -67,7 +67,7 @@ public class CodeGenerator {
                 "/Shanghai");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
         dsc.setUsername("root");
-        dsc.setPassword("root");
+        dsc.setPassword("123456");
         mpg.setDataSource(dsc);
 
         // 包配置
