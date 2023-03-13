@@ -1,40 +1,42 @@
 server:
-  port: 8989
+  port: 8990
   servlet:
     context-path: /
 
 spring:
-   datasource:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/lzj_jxc?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-      username: root
-      password: 123456
-      hikari:
-        # 连接池名
-        pool-name: DateHikariCP
-        # 最小空闲连接数
-        minimum-idle: 5
-        # 空闲连接存活最大时间，默认600000（10分钟）
-        idle-timeout: 180000
-        # 最大连接数，默认10
-        maximum-pool-size: 10
-        # 从连接池返回的连接的自动提交
-        auto-commit: true
-        # 连接最大存活时间，0表示永久存活，默认1800000（30分钟）
-        max-lifetime: 1800000
-        # 连接超时时间，默认30000（30秒）
-        connection-timeout: 30000
-        # 测试连接是否可用的查询语句
-        connection-test-query: SELECT 1
-   ## freemarker
-   freemarker:
-     suffix: .ftl
-     content-type: text/html
-     charset: UTF-8
-     template-loader-path: classpath:/views/
-     request-context-attribute: ctx
-     settings:
-        number_format: 0.##
+  main:
+    allow-circular-references: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/lzj_jxc?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    hikari:
+      # 连接池名
+      pool-name: DateHikariCP
+      # 最小空闲连接数
+      minimum-idle: 5
+      # 空闲连接存活最大时间，默认600000（10分钟）
+      idle-timeout: 180000
+      # 最大连接数，默认10
+      maximum-pool-size: 10
+      # 从连接池返回的连接的自动提交
+      auto-commit: true
+      # 连接最大存活时间，0表示永久存活，默认1800000（30分钟）
+      max-lifetime: 1800000
+      # 连接超时时间，默认30000（30秒）
+      connection-timeout: 30000
+      # 测试连接是否可用的查询语句
+      connection-test-query: SELECT 1
+  ## freemarker
+  freemarker:
+    suffix: .ftl
+    content-type: text/html
+    charset: UTF-8
+    template-loader-path: classpath:/views/
+    request-context-attribute: ctx
+    settings:
+      number_format: 0.##
 
 # Mybatis-plus配置
 mybatis-plus:
@@ -56,6 +58,6 @@ logging:
 
 
 
- ## 控制台日志输出格式
+  ## 控制台日志输出格式
   pattern:
     console: '%d{2100-01-01 13:14:00.666} [%thread] %-5level %logger{50} - %msg%n'

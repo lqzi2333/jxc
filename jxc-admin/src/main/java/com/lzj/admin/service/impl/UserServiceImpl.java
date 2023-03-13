@@ -1,15 +1,27 @@
 package com.lzj.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzj.admin.pojo.User;
 import com.lzj.admin.mapper.UserMapper;
+import com.lzj.admin.quary.UserQuery;
 import com.lzj.admin.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lzj.admin.utils.AssertUtil;
+import com.lzj.admin.utils.PageResultUtil;
 import com.lzj.admin.utils.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -21,19 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    @Override
-    public User login(String userName, String password) {
-        AssertUtil.isTrue(StringUtil.isEmpty(userName),"用户名不能为空!");
-        AssertUtil.isTrue(StringUtil.isEmpty(password),"密码不能为空!");
-        User user = this.findUserByUserName(userName);
-        AssertUtil.isTrue(null == user,"该用户记录不存在或已注销!");
-        /**
-         * 后续引入SpringSecurity 使用框架处理密码
-         */
-        AssertUtil.isTrue(!(user.getPassword().equals(password)),"密码错误!");
-        return user;
-    }
 
     @Override
     public User findUserByUserName(String userName) {
@@ -49,8 +51,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
          *    非空
          *    唯一
          */
-        AssertUtil.isTrue(StringUtil.isEmpty(user.getUserName()),"用户名不能为空!");
-        User temp = this.findUserByUserName(user.getUserName());
+        AssertUtil.isTrue(StringUtil.isEmpty(user.getUsername()),"用户名不能为空!");
+        User temp = this.findUserByUserName(user.getUsername());
         AssertUtil.isTrue(null !=temp && !(temp.getId().equals(user.getId())),"用户名已存在!");
         AssertUtil.isTrue(!(this.updateById(user)),"用户信息更新失败!");
     }
@@ -70,10 +72,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         AssertUtil.isTrue(StringUtil.isEmpty(oldPassword),"请输入原始密码!");
         AssertUtil.isTrue(StringUtil.isEmpty(newPassword),"请输入新密码!");
         AssertUtil.isTrue(StringUtil.isEmpty(confirmPassword),"请输入确认密码!");
-        AssertUtil.isTrue(!(user.getPassword().equals(oldPassword)),"原始密码输入错误!");
+        AssertUtil.isTrue(!(passwordEncoder.matches(oldPassword,user.getPassword())),"原始密码输入错误!");
         AssertUtil.isTrue(!(newPassword.equals(confirmPassword)),"新密码输入不一致!");
         AssertUtil.isTrue(newPassword.equals(oldPassword),"新密码与原始密码不能一致!");
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         AssertUtil.isTrue(!(this.updateById(user)),"用户密码更新失败!");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    public Map<String, Object> userList(UserQuery userQuery) {
+
+        IPage<User> userPage = new Page<>(userQuery.getPage(), userQuery.getLimit());
+
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("is_del",0);
+        if (StringUtils.isBlank(userQuery.getUserName())){
+            userQueryWrapper.like("user_name",userQuery.getUserName());
+        }
+        userPage = this.baseMapper.selectPage(userPage,userQueryWrapper);
+        return PageResultUtil.getResult(userPage.getTotal(),userPage.getRecords());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    public void deleteUser(Integer[] ids) {
+        AssertUtil.isTrue(null == ids  || ids.length == 0,"请选择要删除的记录");
+
+        List<User> list = new ArrayList<User>();
+        for (Integer id:
+             ids) {
+            User temp = this.getById(id);
+            temp.setIsDel(1);
+            list.add(temp);
+        }
+        AssertUtil.isTrue(!(this.updateBatchById(list)),"用户记录删除失败");
     }
 }
